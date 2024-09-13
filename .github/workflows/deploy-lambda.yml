@@ -57,14 +57,6 @@ jobs:
               --zip-file fileb://$ZIP_FILE_PATH \
               --handler function.handler \
               --runtime python3.9 \
+              --environment Variables="{jwtsecret=${{ secrets.JWT_SECRET }}}" \
               --role $ROLE_ARN
         fi
-
-    - name: Update Lambda environment variables
-      run: |
-        FUNCTION_NAME=lambda-auth-lanchonete
-
-        echo "Updating Lambda environment variables..."
-        aws lambda update-function-configuration \
-          --function-name $FUNCTION_NAME \
-          --environment Variables="{jwtsecret=${{ secrets.JWT_SECRET }}}"
