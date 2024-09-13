@@ -59,3 +59,9 @@ jobs:
               --runtime python3.9 \
               --role $ROLE_ARN
         fi
+
+    - name: Update Lambda environment variables
+      run: |
+        aws lambda update-function-configuration \
+          --function-name $FUNCTION_NAME \
+          --environment Variables="{SECRET_KEY=${{ secrets.JWT_SECRET }}}"
