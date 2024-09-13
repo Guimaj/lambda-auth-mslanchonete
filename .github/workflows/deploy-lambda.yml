@@ -62,6 +62,9 @@ jobs:
 
     - name: Update Lambda environment variables
       run: |
+        FUNCTION_NAME=lambda-auth-lanchonete
+
+        echo "Updating Lambda environment variables..."
         aws lambda update-function-configuration \
           --function-name $FUNCTION_NAME \
           --environment Variables="{jwtsecret=${{ secrets.JWT_SECRET }}}"
