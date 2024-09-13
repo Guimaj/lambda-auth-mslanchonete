@@ -1,21 +1,13 @@
-import boto3
 import jwt
+import os
 from jwt import InvalidTokenError, ExpiredSignatureError
-from botocore.exceptions import ClientError
 
 def get_secret(secret_name):
-    client = boto3.client('secretsmanager')
-
-    try:
-        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
-        secret = get_secret_value_response['SecretString']
-        return secret
-    except ClientError as e:
-        raise Exception(f"Erro ao recuperar secret: {e}")
+    return os.environ.get(secret_name)
 
 def lambda_handler(event, context):
 
-    secret = get_secret("jwt-secret")
+    secret = get_secret("jwtsecret")
   
     # Recuperando o token JWT do evento (por exemplo, do corpo da requisição ou dos headers)
     token = event.get('jwt')
