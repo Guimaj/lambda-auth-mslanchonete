@@ -1,13 +1,17 @@
 name: Deploy Lambda
 
 on:
+  workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: [main]
+
+  pull_request:
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
 
     steps:
     - name: Check out code
@@ -40,10 +44,20 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
+    - name: Create lamba role
+      continue-on-error: true 
+      run: |
+        aws iam create-role --role-name lambda-execution-role --assume-role-policy-document '{"Version": "2012-10-17","Statement": [{ "Effect": "Allow", "Principal": {"Service": "lambda.amazonaws.com"}, "Action": "sts:AssumeRole"}]}'
+
+    - name: Get lamba role
+      run: |
+        rolearn=$(aws iam get-role --role-name lambda-execution-role | grep -oP '"Arn": "\K[^"]+(?=")')
+        echo "ROLEARN=$rolearn" >> $GITHUB_ENV
+
     - name: Create or Update Lambda Function
       run: |
         FUNCTION_NAME=lambda-auth-lanchonete
-        ROLE_ARN=arn:aws:iam::851725324532:role/fiap-lambda-role
+        ROLE_ARN=${{ env.ROLEARN }}
         ZIP_FILE_PATH=lambda_function.zip
 
         # Check if the function exists

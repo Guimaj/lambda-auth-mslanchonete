@@ -8,31 +8,27 @@ def get_secret(secret_name):
 def lambda_handler(event, context):
 
     secret = get_secret("jwtsecret")
+
+    response = {
+            "isAuthorized": False
+        }
   
-    # Recuperando o token JWT do evento (por exemplo, do corpo da requisição ou dos headers)
-    token = event.get('jwt')
-
-    if not token:
-        return {
-            'statusCode': 401
-        }
-
     try:
-        decoded_token = jwt.decode(token, secret, algorithms=["HS256"])
+        # Recuperando o token JWT do evento
+        headers = event.get("headers")
+        token = headers.get("authorization", headers.get("Authorization"))
 
-        # Se a verificação for bem-sucedida, o token é válido
-        return {
-            'statusCode': 200
-        }
+        if not token:
+            print('denied: missing auth token')
+            return response
 
-    except ExpiredSignatureError:
-        # O token expirou
-        return {
-            'statusCode': 401
+    
+        decoded_token = jwt.decode(token[7:], secret, algorithms=["HS256"])
+        response = {
+            "isAuthorized": True
         }
-
-    except InvalidTokenError as e:
-        # Token inválido
-        return {
-            'statusCode': 401
-        }
+        print('allowed')
+        return response
+    except BaseException:
+        print('denied')
+        return response
