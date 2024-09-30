@@ -8,15 +8,15 @@ def get_secret(secret_name):
 def lambda_handler(event, context):
 
     secret = get_secret("jwtsecret")
+
+    response = {
+            "isAuthorized": False
+        }
   
     try:
         # Recuperando o token JWT do evento
         headers = event.get("headers")
         token = headers.get("authorization", headers.get("Authorization"))
-
-        response = {
-            "isAuthorized": False
-        }
 
         if not token:
             print('denied: missing auth token')
